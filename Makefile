@@ -2,9 +2,11 @@
 .PHONY: all clean
 
 SOURCE = efi.c
+OBJS = $(SOURCE:.c=.o)
+DEPENDS = $(OBJS:.o=.d)
 TARGET = BOOTX64.EFI
 
-Uncomment for gcc
+# Uncomment for gcc
 CC = x86_64-w64-mingw32-gcc \
 	-Wl,--subsystem,10 \
 	-e efi_main 
@@ -22,14 +24,19 @@ CFLAGS = \
 	-Wextra \
 	-Wpedantic \
 	-mno-red-zone \
+	-MMD \
 	-ffreestanding \
 	-nostdlib 
 
 all: $(TARGET)
 
-$(TARGET): $(SOURCE)
+$(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $<
 
+-include $(DEPENDS)
+ 
+
 clean:
-	rm -rf $(TARGET)
+	rm -rf $(TARGET) 
+	rm $(OBJS)
 
