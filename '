@@ -12,10 +12,10 @@ typedef struct Vec2 {
 EFI_SYSTEM_TABLE* ST;
 Vec2 snake[COL-2*ROW-2] = { { .X=-1, .Y=-1 } };
 UINTN snake_size = 0;
-BOOLEAN grow = 0;
+UINT8 grow = 0;
 DIRECTION dir = RIGHT;
 
-VOID init_board() {
+VOID init_board(VOID){
   // Initialize I/O
   ST->ConOut->SetMode(ST->ConOut, 0); // Screen is 80x25 characters
   ST->ConOut->Reset(ST->ConOut, 1);
@@ -36,16 +36,17 @@ VOID init_board() {
   snake_size = 1;
 }
 
-VOID move_snake(INT8 dx, INT8 dy) {
-  for (UINT16 i=snake_size-1; i>0; i--) {
-    snake[i]=snake[i-1];
-  }
-  snake[0].X += dx;
-  snake[0].Y += dy;
+void move_snake() {
+    grow = 0;
 }
 
+void grow_snake() {
+  grow = 1;
+  snake_size+=1;
+  snake[snake_size-1]=snake[snake_size-2];
+}
 
-VOID read_keyboard() {
+void read_keyboard() {
   EFI_KEY_DATA keyData;
   UINTN idx;
   ST->BootServices->WaitForEvent(1, &ST->ConIn->WaitForKeyEx, &idx);
@@ -63,35 +64,14 @@ VOID read_keyboard() {
     dir = RIGHT;
   }
   else if (keyData.Key.UnicodeChar == u' ') {
-    grow = 1;
+    grow_snake();
   }
 }
 
 
-VOID draw_snake() {
+void draw_snake() {
   ST->ConOut->SetCursorPosition(ST->ConOut, snake[0].X, snake[0].Y);
   ST->ConOut->OutputString(ST->ConOut, u"@");
-}
-
-BOOLEAN snake_on_self() {
-  if (snake_size > 1) {
-    for (UINT16 i=1; i<snake_size; i++) {
-      if (snake[0].X == snake[i].X && snake[0].Y == snake[i].Y)
-        return 1;
-    }
-  }
-  return 0;
-}
-
-VOID game_over() {
-  while(1) {
-    ST->ConOut->ClearScreen(ST->ConOut);
-    ST->ConOut->SetAttribute(ST->ConOut, EFI_RED);
-    ST->ConOut->OutputString(ST->ConOut, u"Game Over: Press a key to shutdown");
-    UINTN idx;
-    ST->BootServices->WaitForEvent(1, &ST->ConIn->WaitForKeyEx, &idx);
-    ST->RuntimeServices->ResetSystem(EfiResetShutdown, EFI_SUCCESS, 0, 0);
-  }
 }
 
 
@@ -103,47 +83,31 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable) {
   init_board();
   //Snake pos can be within (1,1) and (78,22)
   while(1) {
-    if (snake[0].X <=0 || snake[0].X >= COL-1 || snake[0].Y <= 0 || snake[0].Y >= ROW-1) {
-      game_over();
+    /* TODO: Game over
+    if (HEAD_X <=0 || HEAD_X >= COL-1 || HEAD_Y <= 0 || HEAD_Y >= ROW-1) {
+      ST->ConOut->ClearScreen(ST->ConOut);
+      ST->ConOut->SetAttribute(ST->ConOut, EFI_RED);
+      ST->ConOut->OutputString(ST->ConOut, u"Game Over");
+      break;
     } 
+    */
     draw_snake();
     read_keyboard();
-    if (grow) {
-      snake_size++;
-    }
     if (dir==UP) {
-      if (!grow) {
-        ST->ConOut->SetCursorPosition(ST->ConOut, snake[snake_size-1].X, snake[snake_size-1].Y);
-        ST->ConOut->OutputString(ST->ConOut, u" ");
-      }
       move_snake(0,-1);
     }
     if (dir==DOWN) {
-      if (!grow) {
-        ST->ConOut->SetCursorPosition(ST->ConOut, snake[snake_size-1].X, snake[snake_size-1].Y);
-        ST->ConOut->OutputString(ST->ConOut, u" ");
-      }
       move_snake(0,1);
     }
     if (dir==LEFT) {
-      if (!grow) {
-        ST->ConOut->SetCursorPosition(ST->ConOut, snake[snake_size-1].X, snake[snake_size-1].Y);
-        ST->ConOut->OutputString(ST->ConOut, u" ");
-      }
       move_snake(-1,0);
     }
     if (dir==RIGHT) {
-      if (!grow) {
-        ST->ConOut->SetCursorPosition(ST->ConOut, snake[snake_size-1].X, snake[snake_size-1].Y);
-        ST->ConOut->OutputString(ST->ConOut, u" ");
-      }
       move_snake(1,0);
     }
     grow = 0;
-    if (snake_on_self()) {
-      game_over();
-    }
   }
 
+  ST->RuntimeServices->ResetSystem(EfiResetShutdown, EFI_SUCCESS, 0, 0);
   return EFI_SUCCESS;
 }
