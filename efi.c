@@ -36,20 +36,20 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable) {
 
   init_board();
   //Snake pos can be within (1,1) and (78,22)
-  SystemTable->ConOut->SetCursorPosition(SystemTable->ConOut, X, Y);
-  SystemTable->ConOut->OutputString(SystemTable->ConOut, u"P");
+  ST->ConOut->SetCursorPosition(ST->ConOut, X, Y);
+  ST->ConOut->OutputString(ST->ConOut, u"P");
   EFI_KEY_DATA keyData;
   while(1) {
     if (X < 1 || X > 78 || Y < 1 || Y > 22) {
-      SystemTable->ConOut->SetCursorPosition(SystemTable->ConOut, 0, 0);
-      SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
-      SystemTable->ConOut->SetAttribute(SystemTable->ConOut, EFI_RED);
-      SystemTable->ConOut->OutputString(SystemTable->ConOut, u"Game Over");
+      ST->ConOut->SetCursorPosition(ST->ConOut, 0, 0);
+      ST->ConOut->ClearScreen(ST->ConOut);
+      ST->ConOut->SetAttribute(ST->ConOut, EFI_RED);
+      ST->ConOut->OutputString(ST->ConOut, u"Game Over");
       break;
     }
     UINTN idx;
-    SystemTable->BootServices->WaitForEvent(1, &SystemTable->ConIn->WaitForKeyEx, &idx);
-    SystemTable->ConIn->ReadKeyStrokeEx(SystemTable->ConIn, &keyData);
+    ST->BootServices->WaitForEvent(1, &ST->ConIn->WaitForKeyEx, &idx);
+    ST->ConIn->ReadKeyStrokeEx(ST->ConIn, &keyData);
     if (keyData.Key.UnicodeChar == u'w') {
       dir = UP;
     }
@@ -95,6 +95,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable) {
     }
   }
 
-  SystemTable->RuntimeServices->ResetSystem(EfiResetShutdown, EFI_SUCCESS, 0, 0);
+  ST->RuntimeServices->ResetSystem(EfiResetShutdown, EFI_SUCCESS, 0, 0);
   return EFI_SUCCESS;
 }
