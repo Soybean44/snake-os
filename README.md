@@ -10,4 +10,4 @@ To set up the test image run `create_image.sh` to create and/or update the test.
 To run the os, flash `test.hdd` to a usb via dd or install qemu and run `qemu.sh`
 
 ## Docs
-The documentation for the UEFI Specification used in this project can be found here ()[https://uefi.org/specs/UEFI/2.10]
+The documentation for the UEFI Specification used in this project can be found here https://uefi.org/specs/UEFI/2.10
