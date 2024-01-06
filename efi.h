@@ -350,10 +350,8 @@ typedef struct EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL {
     EFI_EVENT                                   WaitForKeyEx;
     //EFI_SET_STATE                               SetState;
     void*                               SetState;
-    //EFI_REGISTER_KEYSTROKE_NOTIFY               RegisterKeyNotify;
-    void*               RegisterKeyNotify;
-    //EFI_UNREGISTER_KEYSTROKE_NOTIFY             UnregisterKeyNotify;
-    void*             UnregisterKeyNotify;
+    EFI_REGISTER_KEYSTROKE_NOTIFY               RegisterKeyNotify;
+    EFI_UNREGISTER_KEYSTROKE_NOTIFY             UnregisterKeyNotify;
 } EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL;
 
 //************************************************
