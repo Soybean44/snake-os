@@ -115,6 +115,7 @@ VOID EFIAPI game_loop(EFI_EVENT Event, VOID* Context) {
   BOOLEAN* grow = ctx->grow;
   DIRECTION* dir = ctx->dir;
   ST->RuntimeServices->ResetSystem(EfiResetShutdown, EFI_SUCCESS, 0, 0);
+  /* ignore this for now
   if (*grow) {
       *snake_size+=1;
     }
@@ -147,6 +148,7 @@ VOID EFIAPI game_loop(EFI_EVENT Event, VOID* Context) {
       move_snake(1,0);
     }
     *grow = 0;
+    */
 }
 
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable) {
@@ -162,6 +164,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable) {
     .grow = &grow,
     .dir = &dir,
   };
+  // Create event
   ST->BootServices->CreateEvent(EVT_TIMER, TPL_APPLICATION, game_loop, &ctx, game_loop_event);
   ST->BootServices->SetTimer(game_loop_event, TimerRelative, 5);
   while(1) {
