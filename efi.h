@@ -468,6 +468,57 @@ typedef struct {
     void*          QueryVariableInfo;
 } EFI_RUNTIME_SERVICES;
 
+//******************************************************\*
+// EFI_EVENT_NOTIFY
+//******************************************************\*
+typedef
+VOID
+(EFIAPI *EFI_EVENT_NOTIFY) (
+    IN EFI_EVENT          Event,
+    IN VOID              *Context
+);
+
+//******************************************************
+// Task Priority Levels
+//******************************************************
+#define TPL_APPLICATION    4
+#define TPL_CALLBACK       8
+#define TPL_NOTIFY         16
+#define TPL_HIGH_LEVEL     31
+
+//******************************************************
+// Event Types
+//******************************************************
+// These types can be "ORed" together as needed - for example,
+// EVT_TIMER might be "Ored" with EVT_NOTIFY_WAIT or
+// EVT_NOTIFY_SIGNAL.
+#define EVT_TIMER                            0x80000000
+#define EVT_RUNTIME                          0x40000000
+
+#define EVT_NOTIFY_WAIT                      0x00000100
+#define EVT_NOTIFY_SIGNAL                    0x00000200
+
+#define EVT_SIGNAL_EXIT_BOOT_SERVICES        0x00000201
+#define EVT_SIGNAL_VIRTUAL_ADDRESS_CHANGE    0x60000202
+
+// EFI_CREATE_EVENT: UEFI Spec 2.10 section 7.1.1
+typedef
+EFI_STATUS
+(EFIAPI *EFI_CREATE_EVENT) (
+    IN UINT32                   Type,
+    IN EFI_TPL                  NotifyTpl,
+    IN EFI_EVENT_NOTIFY         NotifyFunction, OPTIONAL
+    IN VOID                     *NotifyContext, OPTIONAL
+    OUT EFI_EVENT               *Event
+);
+
+// EFI_CLOSE_EVENT: UEFI Spec 2.10 section 7.1.3
+typedef
+EFI_STATUS
+(EFIAPI *EFI_CLOSE_EVENT) (
+    IN EFI_EVENT      Event
+);
+
 // EFI_WAIT_FOR_EVENT: UEFI Spec 2.10 section 7.1.5
 typedef
 EFI_STATUS
@@ -475,6 +526,23 @@ EFI_STATUS
     IN UINTN             NumberOfEvents,
     IN EFI_EVENT         *Event,
     OUT UINTN            *Index
+);
+//******************************************************
+//EFI_TIMER_DELAY
+//******************************************************
+typedef enum {
+    TimerCancel,
+    TimerPeriodic,
+    TimerRelative
+} EFI_TIMER_DELAY;
+
+// EFI_SET_TIMER: UEFI Spec 2.10 section 7.1.7
+typedef
+EFI_STATUS
+(EFIAPI *EFI_SET_TIMER) (
+    IN EFI_EVENT               Event,
+    IN EFI_TIMER_DELAY         Type,
+    IN UINT64                  TriggerTime
 );
 
 // EFI_BOOT_SERVICES: UEFI Spec 2.10 section 4.4.1
@@ -509,15 +577,12 @@ typedef struct {
     //
     // Event & Timer Services
     //
-    //EFI_CREATE_EVENT     CreateEvent;    // EFI 1.0+
-    void*     CreateEvent;    // EFI 1.0+
-    //EFI_SET_TIMER        SetTimer;       // EFI 1.0+
-    void*        SetTimer;       // EFI 1.0+
+    EFI_CREATE_EVENT     CreateEvent;    // EFI 1.0+
+    EFI_SET_TIMER        SetTimer;       // EFI 1.0+
     EFI_WAIT_FOR_EVENT   WaitForEvent;   // EFI 1.0+
     //EFI_SIGNAL_EVENT     SignalEvent;    // EFI 1.0+
     void*     SignalEvent;    // EFI 1.0+
-    //EFI_CLOSE_EVENT      CloseEvent;     // EFI 1.0+
-    void*      CloseEvent;     // EFI 1.0+
+    EFI_CLOSE_EVENT      CloseEvent;     // EFI 1.0+
     //EFI_CHECK_EVENT      CheckEvent;     // EFI 1.0+
     void*      CheckEvent;     // EFI 1.0+
 
