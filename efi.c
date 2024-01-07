@@ -10,7 +10,10 @@ typedef struct Vec2 {
   INTN Y;
 } Vec2;
 EFI_SYSTEM_TABLE* ST;
+EFI_RNG_PROTOCOL* RNG;
+EFI_HANDLE* RNG_HANDLE;
 Vec2 snake[COL-2*ROW-2] = { { .X=-1, .Y=-1 } };
+Vec2 food;
 UINT16 snake_size = 0;
 BOOLEAN grow = 0;
 DIRECTION dir = RIGHT;
@@ -139,7 +142,8 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable) {
   // TODO: remove this line when using input params
   (void)ImageHandle;
   ST = SystemTable;
-
+  EFI_GUID RNG_GUID = EFI_RNG_PROTOCOL_GUID;
+  ST->BootServices->InstallProtocolInterface(RNG_HANDLE, &RNG_GUID, EFI_NATIVE_INTERFACE, RNG);
   init_board();
   //Snake pos can be within (1,1) and (78,22)
   // Create event
