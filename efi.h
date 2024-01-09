@@ -1,4 +1,5 @@
 #pragma once
+// NOTE THAT MOST OF THIS FILE IS IRRELEVANT JUNK I MESSED ARROUND WITH, TO REALLY UNDERSTAND THIS FILE VISIT THE UEFI SPEC LISTED IN THE README
 #include <stdint.h>
 #if __has_include(<uchar.h>)
 #include <uchar.h>
