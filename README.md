@@ -17,16 +17,16 @@ As for later on in the tutorial I will assume your drive is `/dev/sda`, but plea
 
 Once you note what device your USB is, we need to partition it. For this I prefer using `cfdisk`, but any partitioning application can work.
 To partition in `cfdisk` is as follows, run the command `cfdisk /dev/sda`. This should open up an interface like so:
-[](Images/cfdisk.png)
+![](Images/cfdisk.png)
 
 Select gpt and move onward to the next screen, which should loop like this:
-[](Images/partitioning.png)
+![](Images/partitioning.png)
 
 If there are partitions already on the disk you are encouraged to delete them if you do not know what you are doing and are sure you don't have any sensitive data on the USB.
 
 The options on the bottom can be navigated with tab and shift tab. **NOTE THAT YOU WILL WIPE YOUR DRIVE CLEAN DOING THIS.**
 Create a new partition, and it should ask you for the size of said partition; it can be however big you want it, but I recommend a minimum size of 33M. Once you create a partition make sure it is selected with the arrow keys and then go change the type with the bottom menu. Upon entering the menu you should see the following:
-[](Images/partition-types.png)
+![](Images/partition-types.png)
 
 Select EFI System as seen in the image and then move on to writing the partitions on the bottom options. It will prompt you to type out the word "yes" which you can do if you want to overwrite all the data on said USB.
 
