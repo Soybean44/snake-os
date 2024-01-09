@@ -42,6 +42,12 @@ With that we have a bootable USB with the snake OS loaded. Unmount the USB by ru
 
 To run the OS, create a USB image and boot off it [found here](#usb-setup) or install qemu and run `qemu.sh`
 
+## Images
+
+![](Images/snake.png)
+
+![](Images/game-over.png)
+
 ## Docs
 
 The documentation for the UEFI Specification used in this project can be found here https://uefi.org/specs/UEFI/2.10
