@@ -6,11 +6,10 @@ typedef enum {
   UP,DOWN,LEFT,RIGHT
 } DIRECTION;
 typedef struct Vec2 {
-  INTN X;
-  INTN Y;
+  UINTN X;
+  UINTN Y;
 } Vec2;
 EFI_SYSTEM_TABLE* ST;
-EFI_RNG_PROTOCOL* RNG;
 EFI_HANDLE* RNG_HANDLE;
 Vec2 snake[COL-2*ROW-2] = { { .X=-1, .Y=-1 } };
 Vec2 food;
@@ -19,7 +18,16 @@ BOOLEAN grow = 0;
 DIRECTION dir = RIGHT;
 UINTN idx = 0;
 EFI_EVENT events[2];
+UINTN seed = 1;
+UINTN tick = 1;
 
+VOID srand (UINTN newseed) {
+    seed = newseed & 0x7fffffffU;
+}
+UINTN rand (void) {
+    seed = (seed * 1103515245U + 12345U) & 0x7fffffffU;
+    return (UINTN)seed;
+}
 VOID init_board() {
   // Initialize I/O
   ST->ConOut->SetMode(ST->ConOut, 0); // Screen is 80x25 characters
@@ -39,6 +47,9 @@ VOID init_board() {
   snake[0].X=1;
   snake[0].Y=1;
   snake_size = 1;
+  // Init food
+  food.X = 40;
+  food.Y = 15;
 }
 
 // run 5e7 100ns blocks
@@ -89,6 +100,15 @@ BOOLEAN snake_on_self() {
     }
   }
   return 0;
+}
+VOID eat_food_if_able() {
+  if (snake[0].X == food.X && snake[0].Y == food.Y) {
+    srand(tick);
+    UINTN randn = rand();
+    food.X = (randn % (COL-2))+1;
+    food.Y = (randn % (ROW-3))+1;
+    grow = 1;
+  }
 }
 
 VOID game_over() {
@@ -142,8 +162,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable) {
   // TODO: remove this line when using input params
   (void)ImageHandle;
   ST = SystemTable;
-  EFI_GUID RNG_GUID = EFI_RNG_PROTOCOL_GUID;
-  ST->BootServices->InstallProtocolInterface(RNG_HANDLE, &RNG_GUID, EFI_NATIVE_INTERFACE, RNG);
   init_board();
   //Snake pos can be within (1,1) and (78,22)
   // Create event
@@ -151,9 +169,12 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable) {
   ST->BootServices->CreateEvent(EVT_TIMER, TPL_CALLBACK, (EFI_EVENT_NOTIFY)0, (VOID*)0, &events[1]);
   ST->BootServices->SetTimer(events[1], TimerPeriodic, 5e5);
   while(1) {
+    tick++;
     if (snake[0].X <=0 || snake[0].X >= COL-1 || snake[0].Y <= 0 || snake[0].Y >= ROW-1) {
       game_over();
     } 
+    ST->ConOut->SetCursorPosition(ST->ConOut, food.X, food.Y);
+    ST->ConOut->OutputString(ST->ConOut, u"$");
     draw_snake();
     read_keyboard();
     EFI_STATUS Status = ST->BootServices->WaitForEvent(2, events, &idx);
@@ -168,6 +189,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable) {
     if (snake_on_self()) {
       game_over();
     }
+    eat_food_if_able();
   }
   return EFI_SUCCESS;
 }
