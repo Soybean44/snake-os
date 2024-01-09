@@ -170,7 +170,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable) {
   ST->BootServices->SetTimer(events[1], TimerPeriodic, 5e5);
   while(1) {
     tick++;
-    if (snake[0].X <=0 || snake[0].X >= COL-1 || snake[0].Y <= 0 || snake[0].Y >= ROW-1) {
+    if (snake[0].X <=0 || snake[0].X >= COL-1 || snake[0].Y <= 0 || snake[0].Y >= ROW-2) {
       game_over();
     } 
     ST->ConOut->SetCursorPosition(ST->ConOut, food.X, food.Y);
