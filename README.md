@@ -51,3 +51,7 @@ To run the OS, create a USB image and boot off it [found here](#usb-setup) or in
 ## Docs
 
 The documentation for the UEFI Specification used in this project can be found here https://uefi.org/specs/UEFI/2.10
+
+## LICENSE
+
+The license can be found in the LICENSE file
