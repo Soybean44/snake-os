@@ -37,6 +37,7 @@ VOID init_board() {
   ST->ConOut->Reset(ST->ConOut, 1);
   ST->ConIn->Reset(ST->ConIn, 1);
   ST->ConOut->EnableCursor(ST->ConOut, 0);
+  ST->ConOut->SetAttribute(ST->ConOut, EFI_WHITE);
   // Draw borders
   for(UINT8 x=0; x<COL; x++) {
     for(UINT8 y=0; y<ROW; y++) {
@@ -46,6 +47,7 @@ VOID init_board() {
         }
     }
   }
+  snake_size = 0;
   // Init snake
   snake[0].X=1;
   snake[0].Y=1;
@@ -53,6 +55,10 @@ VOID init_board() {
   // Init food
   food.X = 40;
   food.Y = 15;
+  // Create events for keyboard input and a periodic timer.
+  events[0] = ST->ConIn->WaitForKeyEx;
+  ST->BootServices->CreateEvent(EVT_TIMER, TPL_CALLBACK, (EFI_EVENT_NOTIFY)0, (VOID*)0, &events[1]);
+  ST->BootServices->SetTimer(events[1], TimerPeriodic, 5e5); // Trigger the timer every 5e6ns (timer is queried over 100ns chunks)
 }
 
 // Update the snake array 
@@ -124,10 +130,18 @@ VOID game_over() {
   while(1) {
     ST->ConOut->ClearScreen(ST->ConOut);
     ST->ConOut->SetAttribute(ST->ConOut, EFI_RED);
-    ST->ConOut->OutputString(ST->ConOut, u"Game Over: Press a key to shutdown");
+    ST->ConOut->OutputString(ST->ConOut, u"Game Over: Press a key to shutdown or r to restart");
     UINTN idx;
     ST->BootServices->WaitForEvent(1, &ST->ConIn->WaitForKeyEx, &idx);
-    ST->RuntimeServices->ResetSystem(EfiResetShutdown, EFI_SUCCESS, 0, 0);
+    EFI_KEY_DATA keyData;
+    ST->ConIn->ReadKeyStrokeEx(ST->ConIn, &keyData);
+    if (keyData.Key.UnicodeChar == u'r') {
+      init_board();
+      break;
+    }
+    else {
+      ST->RuntimeServices->ResetSystem(EfiResetShutdown, EFI_SUCCESS, 0, 0);
+    }
   }
 }
 
@@ -176,10 +190,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable) {
   ST = SystemTable;
   init_board();
   // Snake pos can be within (1,1) and (78,22)
-  // Create events for keyboard input and a periodic timer.
-  events[0] = ST->ConIn->WaitForKeyEx;
-  ST->BootServices->CreateEvent(EVT_TIMER, TPL_CALLBACK, (EFI_EVENT_NOTIFY)0, (VOID*)0, &events[1]);
-  ST->BootServices->SetTimer(events[1], TimerPeriodic, 5e5); // Trigger the timer every 5e6ns (timer is queried over 100ns chunks)
   while(1) {
     // Update tick to act as a "clock" 
     // This will be used to seed the random number generator
